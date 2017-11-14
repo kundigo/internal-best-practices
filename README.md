@@ -72,17 +72,28 @@ Il est possible de créer un commit 'vide', c'est à dire d'ajouter un commit à
 
 Vous n'êtes absolument pas obliger de partager votre code à chaque commit, mais selon qui sera votre responsable de projet, il est possible qu'on vous demande de ne partager vos changements qu'avec un seul commit enregistré dans l'historique pour l'intégralité de l'issue en cours. Nous allons introduire une commande qui va vous simplifier la vie, mais qui est à utiliser avec parcimonie:
 ```git rebase -i branche_sur_laquelle_on_veut_rebase```
-Pour plus d'informations, vous pouvez vous référer au chapitre [Le cas du rebase](#Le-cas-di-rebase).
+Pour plus d'informations, vous pouvez vous référer au chapitre 'Modification de l'historique avec la commande rebase'.
 
+Vous avez un code qui fonctionne sur votre branche, et il est temps de le partager pour la création de la pull request (si il existe un jour un chapitre sur l'utilisation de github/gitlab, ce sera expliqué dedans).
 
+Avant de pousser votre travail sur le répertoire distant, il faut vous assurer que votre travail est compatible avec le code actuel de la branche sur laquelle vous voulez le fusionnez.
+Supposons que vous souhaitez pousser le travail sur votre branche locale ma_branche sur la branche distante ma_branche, pour au final faire une pull request pour fusionnez votre travail sur la branche master. Vous êtes actuellement sur la branche mon_dev.
+Les étapes à suivre sont le suivantes (les étapes 1 à 3 ne sont bien evidemment à réaliser que dans le cas ou vous ne venez pas déjà de récupérer le code de master sur le dépot distant, dans le cas d'un rebase par exemple).
+1) git checkout master
+2) git pull
+3) git checkout mon_dev
+4) git merge master
+5) Gérer les conflits éventuels ([Les difficultés probables](#Les-difficultés-probables))
+6) git push, si la branche a été créé en local, vous devrez faire ```git push -u origin mon_dev``` pour préciser au dépôt distant de créer la branche mon_dev de son côté.
 
+Il ne vous reste plus qu'à créer votre pull request.
 
-#### Le cas du rebase
+#### Modification de l'historique avec la commande rebase
 
 Le but premier du rebase est de fusionner des branches avec un historique divergent. Ce qui va nous intéresser ici est simplement la possibilité qu'il offre de réécrire l'historique des commits.
 Si vous voulez devenir des pros du rebase je vous invite à vous rendre [ici](https://git-scm.com/docs/git-rebase).
 
-Important: Evitez de faire un rebase sur une branche si vous n'êtes pas la seule personne à la modifier si vous ne voulez pas vous faire sauvagement assasiner par vos collègues.
+ATTENTION: Evitez de faire un rebase sur une branche si vous n'êtes pas la seule personne à la modifier si vous ne voulez pas vous faire sauvagement assasiner par vos collègues.
 
 ATTENTION: il est PRIMORDIAL de récupérer la branche d'origine sur laquelle on souhaite rebase AVANT de rebase, sinon vous êtes parti pour des heures de pleurs de et souffrances si quelqu'un à effectué des modifications de la dite branche entre temps.
 
@@ -118,7 +129,7 @@ fixup 536fsx2 commit 5
 
 Sauvegarder le fichier et ça devrait être bon.
 
-Si ce n'est pas bon, c'est que vous avez rencontré des conflits. Pour la gestion des conflits à proprement parler, allez au chapitre [Les difficultés probables](#Les-difficultés-probables).
+Si ce n'est pas bon, c'est que vous avez rencontré des conflits. Pour la gestion des conflits à proprement parler, allez au chapitre [Les conflits](#Les-conflits).
 
 Pourquoi un conflit ? si une modification effectué sur master n'est pas compatible avec une de vos modification dans un commit, vous allez avoir des conflits. A chaque étape du rebase (une étape == fusion du master avec un de vos commits), il va falloir gérer les conflits associés. Si vous rencontrer plusieurs fois le même conflit c'est parfaitement normal: supposons que vous ayez modifié le fichier pilou.rb dans votre premier commit. Si ce fichier à été modifié dans le code du master avec des modifications incompatibles, le rebase va, pour chacun de VOS commit, vous demander comment il doit gérer ce conflit (soit gérer 5 fois le même conflit).
 
@@ -126,11 +137,26 @@ Une fois que tous les conflits ont été traité, vous pouvez continuer le rebas
 
 Si à un moment donné vous êtes perdu et souhaitez annuler le rebase: ```git rebase --abort```.
 
-#### Les difficultés probables
+#### Les conflits
 
-conflits (parler de meld)
+Lorsque vous faite un pull ou un rebase, il est possible que git vous indique qu'il y a des conflits entre votre branche et la branche sur laquelle vous souhaitez ajouter votre travail. Un conflit est une différence insoluble pour Git entre deux versions différentes d'un même fichier.
 
-branches divergentes
+C'est ici que Meld va vous sauvez la vie. Si vous ne l'avez pas déjà installé, je vous invite à le faire.
+
+Lorsque vous rencontrez un conflit, vous pouvez effectuer la commande : ```git mergetool -y```
+L'argument mergetool va ouvrir votre gestionnaire de conflits (celui qui est paramétré dans votre fichier .git/gitconfig), et l'argument -y va vous éviter, à chaque fois que vous venez de finr de modifier un fichier, de préciser que vous souhaitez passez au conflit suivant.
+
+Dans Meld, vous aurez 3 fenêtres :
+A gauche, l'état de votre code local, c'est à dire la branche sur laquelle vous vous trouvez actuellement.
+A droite, l'état de la branche avec laquelle vous êtes en conflit.
+Au centre, le fichier de sortie que vous aurez au final.
+
+Le but est de bouger/modifier les morceaux de code qui se trouvent à gauche et à droite pour avoir une partie centrale cohérente, sans perte de fonctionnalité.
+Lorsque vous êtes satisfait du résultat, sauvegardez le fichier central, puis passez au conflit suivant en fermant Meld.
+
+Une fois tous les conflits traités,^soit vous êtes dans le cas d'un pull et vous n'avez plus rien à faire à ce niveau, soit vous êtes dans le cas d'un rebase 
+
+
 
 #### Recapitulatifs des commandes communes
 
@@ -155,6 +181,7 @@ Voir toutes les branches locales et distantes:
 
 Récupérer les commits d'une branche distante:
 ```git pull```
+```git pull --rebase origin```
 
 Sauvegarder son code:
 ```git add nom_du_fichier_a_sauvegarder```
@@ -176,3 +203,18 @@ Réécrire l'historique:
 
 Voir l'historique:
 ```git log```
+
+Fusionnez des branches:
+```git merge branche_a_inclure```
+
+Partager son code:
+```git push```
+```git branch --set-upstream my_branch origin/my_branch```
+```git push -u origin my_branch```
+
+
+Modifier le dépôt d'origine:
+```git remote set-url origin <nouvelle adresse>```
+
+Outil de merge:
+```git mergetool -y```
