@@ -33,10 +33,10 @@ Dans ce petit guide, nous supposons que vous savez ce que fait Git, ce qu'est un
 #### Workflow
 
 Avant tout, il y a deux choses qu'il faut toujours vérifier avant de commencer à changer quoi que ce soit dans votre projet(pour vous éviter des migraines):
-- s'assurer qu'on est sur la bonne branche, c'est bête mais ça peut sauver des vies.
-- faire des 'git pull' réguliers pour récupérer le travail de vos collègues. Cela vous évitera de nombreux conflits.
+- s'assurer que vous êtes sur la bonne branche, c'est bête mais ça peut sauver des vies.
+- faire des 'git pull' réguliers pour récupérer le travail de vos collègues si vous travaillez à plusieurs sur une même branche. Cela vous évitera de nombreux conflits.
 
-Ensuite, il est très important de ne JAMAIS push son travail sur la branche master directement. La branche master doit en permanence avoir un code déployable, c'est à dire qu'elle doit être suffisamment clean pour permettre de lancer l'application en production. C'est le chef de projet qui sera en charge de merge votre code sur master si il estime que ce dernier est conforme à ce qu'on attend.
+Ensuite, il est très important de ne JAMAIS push son travail sur la branche master directement. La branche master doit en permanence avoir un code déployable, c'est à dire qu'elle doit être suffisamment clean pour permettre de lancer l'application en production. C'est le chef de projet qui sera en charge de merge votre code sur master si il estime que ce dernier est conforme à ce qui est demandé.
 
 Classiquement, lorsque vous allez commencez à travailler sur une issue qui vous aura été assignée, la première chose à faire - si cela n'a pas déjà été fait - est de créer une branche spécifique pour travailler sans risque de démolir ce qui existe déjà et fonctionne:
 ```git branch nom_de_la_branche```
@@ -78,12 +78,13 @@ Vous avez un code qui fonctionne sur votre branche, et il est temps de le partag
 
 Avant de pousser votre travail sur le répertoire distant, il faut vous assurer que votre travail est compatible avec le code actuel de la branche sur laquelle vous voulez le fusionnez.
 Supposons que vous souhaitez pousser le travail sur votre branche locale ma_branche sur la branche distante ma_branche, pour au final faire une pull request pour fusionnez votre travail sur la branche master. Vous êtes actuellement sur la branche mon_dev.
-Les étapes à suivre sont le suivantes (les étapes 1 à 3 ne sont bien evidemment à réaliser que dans le cas ou vous ne venez pas déjà de récupérer le code de master sur le dépot distant, dans le cas d'un rebase par exemple).
+
+Les étapes à suivre sont les suivantes (les étapes 1 à 3 ne sont bien evidemment à réaliser que dans le cas ou vous ne venez pas déjà de récupérer le code de master sur le dépot distant, dans le cas d'un rebase par exemple).
 1) git checkout master
 2) git pull
 3) git checkout mon_dev
 4) git merge master
-5) Gérer les conflits éventuels ([Les difficultés probables](#Les-difficultés-probables))
+5) Gérer les conflits éventuels ([Les difficultés probables](#Les-conflits))
 6) git push, si la branche a été créé en local, vous devrez faire ```git push -u origin mon_dev``` pour préciser au dépôt distant de créer la branche mon_dev de son côté.
 
 Il ne vous reste plus qu'à créer votre pull request.
@@ -95,7 +96,7 @@ Si vous voulez devenir des pros du rebase je vous invite à vous rendre [ici](ht
 
 ATTENTION: Evitez de faire un rebase sur une branche si vous n'êtes pas la seule personne à la modifier si vous ne voulez pas vous faire sauvagement assasiner par vos collègues.
 
-ATTENTION: il est PRIMORDIAL de récupérer la branche d'origine sur laquelle on souhaite rebase AVANT de rebase, sinon vous êtes parti pour des heures de pleurs de et souffrances si quelqu'un à effectué des modifications de la dite branche entre temps.
+ATTENTION: il est PRIMORDIAL de récupérer la branche d'origine sur laquelle vous souhaitez rebase AVANT de rebase, sinon vous êtes parti pour des heures de pleurs de et souffrances si quelqu'un à effectué des modifications de la dite branche entre temps.
 
 Je vais prendre un exemple concret pour expliquer les étapes à suivre dans le cas d'utilisation le plus courant (réécrire l'historique).
 Vous avez une branche mon_code qui a été créée à partir de la branche master, et vous avez enregistré 5 commits sur cette branche que nous appelerons 'commit 1-5'. Nous sommes actuellement sur la branche mon_dev.
@@ -106,7 +107,7 @@ Vous voulez garder 1 seul des 5 commits, et ce commit doit contenir l'intégrali
 3) git checkout mon_dev
 4) git rebase -i master
 
-Quand vous allez exécuter la commande ```git rebase -i master``` depuis la branche mon_code, vous demandez à git de coller tous vos commit à la suite du dernier commit de master. A ce niveau, on a l'équivalent d'un simple merge, à la différence prêt que le rebase va ouvrir une fenêtre dans votre éditeur de texte par défaut (il est possible de le modifier dans le fichier de config de git, je vous laisse chercher la solution spécifique à votre éditeur).
+Quand vous allez exécuter la commande ```git rebase -i master``` depuis la branche mon_code, vous demandez à git de coller tous vos commit à la suite du dernier commit de master. A ce niveau, vous avez l'équivalent d'un simple merge, à la différence prêt que le rebase va ouvrir une fenêtre dans votre éditeur de texte par défaut (il est possible de le modifier dans le fichier de config de git, je vous laisse chercher la solution spécifique à votre éditeur).
 Cette fenêtre va se présenter sous cette forme:
 ```
 pick fb2f677 commit 1
@@ -117,7 +118,7 @@ pick 536fsx2 commit 5
 
 ```
 
-Ce qu'on veut, c'est remplacer les 'pick' des commits à effacer par des 'fixup'. Si on souhaite réécrire le message de commit du premier commit on peut changer 'pick' par 'reword':
+Ce qu'on veut, c'est remplacer les 'pick' des commits à effacer par des 'fixup'. Si vous souhaitez réécrire le message de commit du premier commit vous pouvez changer 'pick' par 'reword':
 ```
 reword fb2f677 mon beau message de commit
 fixup c5069d5 commit 2
